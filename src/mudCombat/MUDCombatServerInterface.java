@@ -4,14 +4,17 @@
 
 package mudCombat;
 
+import java.io.IOException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 public interface MUDCombatServerInterface extends Remote {
 
-	public void initialize() throws RemoteException;
+	public void initialize(Monster monster, int inventory) throws RemoteException, IOException;
 
-	public void combat(String playerName, String piece) throws RemoteException;
+	public void updateMonsterInventory(Monster monster) throws RemoteException;
 
-	public boolean chooseCombatOrEscape(String playerName) throws RemoteException;
+	public char getWinner(char[] winners) throws RemoteException;
+
+	public int getInventory(Monster monster) throws RemoteException;
 }

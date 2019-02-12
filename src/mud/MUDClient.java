@@ -9,10 +9,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
+import java.util.concurrent.TimeUnit;
 
 import javax.naming.NamingException;
 
 import mudCombat.MUDCombatServerInterface;
+import mudCombat.Monster;
 
 public class MUDClient {
 
@@ -25,6 +27,8 @@ public class MUDClient {
 	private static String hostname;
 
 	private static int port;
+
+	private static Monster monster;
 
 	// specify whether the game is running or not
 	private static boolean running = false;
@@ -101,8 +105,8 @@ public class MUDClient {
 				System.err.println(e.getMessage());
 			}
 			if (serv.ExistsInMud(playerName)) {
-				System.out
-						.println("You are already a player and you have " + serv.NumberOfLives(playerName) + "points");
+				System.out.println("You are already a player and you have " + serv.getPlayerInventoryByName(playerName)
+						+ "points");
 			} else {
 				System.out.println("Nice to meet you, " + playerName);
 				System.out.println();
@@ -143,7 +147,7 @@ public class MUDClient {
 	}
 
 	// handle an input from the player
-	private static void handlePlayerInput(String playerInput) throws RemoteException, NamingException {
+	private static void handlePlayerInput(String playerInput) throws NamingException, IOException {
 
 		// move the user in a given direction
 		if (playerInput.contains("move")) {
@@ -160,10 +164,42 @@ public class MUDClient {
 				// move the player and display information about the new location
 				System.out.println("You are going " + directionString[1] + "...");
 				currentLocation = serv.moveUser(currentLocation, directionString[1], playerName);
+				monster = new Monster(directionString[1]);
+				System.out.println("monster");
 				System.out.println(serv.getCurrentLocationInfo(currentLocation));
 				combatServ = serv.getCombat(hostname, port);
-				combatServ.initialize();
-				combatServ.combat(playerName, directionString[1]);
+				combatServ.initialize(monster, serv.getPlayerInventoryByName(playerName));
+				boolean tour = true;
+				// Player choosed to escape
+				while (tour && serv.getPlayerInventoryByName(playerName) > 0 && combatServ.getInventory(monster) > 0) {
+					char winner;
+					char[] winners = { 'm', 'p' };
+
+					System.out.println("A combat is taking place in new tour");
+					try {
+						TimeUnit.SECONDS.sleep(1);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					winner = combatServ.getWinner(winners);
+					if (winner == 'm') {
+						System.out.println("This tour is finished, The winner is: The monster");
+						serv.updatePlayerInventory(playerName);
+					}
+
+					else if (winner == 'p') {
+						System.out.println("This tour is finished, The winner is: The player");
+						combatServ.updateMonsterInventory(monster);
+					}
+					System.out.println("Player inventory:" + serv.getPlayerInventoryByName(playerName));
+					System.out.println("Monster inventory:" + combatServ.getInventory(monster));
+					tour = chooseCombatOrEscape(playerName);
+				}
+				if (serv.getPlayerInventoryByName(playerName) == 0)
+					System.out.println("You are dead");
+				else if (combatServ.getInventory(monster) == 0)
+					System.out.println("The monster is dead, You can go on");
 			}
 		}
 
@@ -251,5 +287,39 @@ public class MUDClient {
 			// move the player to the MUD
 			System.out.println(serv.createUser(playerName, mudName));
 		}
+	}
+
+	public static boolean chooseCombatOrEscape(String playerName) {
+		System.out.println();
+		System.out.println("There is a monster in this piece, you can choose from one of these commands:");
+		System.out.println();
+		System.out.println("* Combat  - attack the monster");
+		System.out.println("* Escape  - run away from the monster");
+		try {
+			System.out.println();
+			System.out.print(">> ");
+			String playerInput = in.readLine().toLowerCase();
+			// attack the monster
+			if (playerInput.equals("combat")) {
+
+				System.out.println("You choosed to attack the monster");
+				return true;
+
+			}
+			// run away from the monster
+			if (playerInput.equals("escape")) {
+
+				System.out.println("You choosed to escape from the monster");
+				displayOptions();
+				return false;
+			} else {
+				System.out.println("You should choose escape or combat");
+			}
+
+		} catch (IOException e) {
+			System.err.println("I/O error.");
+			System.err.println(e.getMessage());
+		}
+		return false;
 	}
 }

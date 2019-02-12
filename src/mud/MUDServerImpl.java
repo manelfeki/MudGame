@@ -26,6 +26,8 @@ public class MUDServerImpl implements MUDServerInterface {
 	// stores the name of the player and the name of the MUD that the player is on
 	public static Map<String, Integer> currentPlayers = new HashMap<String, Integer>();
 
+	public static Map<String, Integer> monsters = new HashMap<String, Integer>();
+
 	// maximum number of player currently online
 	private static int maxNumberOfPlayers = 10;
 
@@ -38,6 +40,10 @@ public class MUDServerImpl implements MUDServerInterface {
 	// create the MUD
 	public void initialize() {
 		// MUDs.put("myMUD", new MUD("mymud.edg", "mymud.msg", "mymud.thg"));
+		monsters.put("north", 5);
+		monsters.put("west", 5);
+		monsters.put("east", 5);
+		monsters.put("south", 5);
 		currentInstance = new MUD("mymud.edg", "mymud.msg", "mymud.thg");
 	}
 
@@ -124,13 +130,16 @@ public class MUDServerImpl implements MUDServerInterface {
 	}
 
 	@Override
-	public int NumberOfLives(String playerName) {
+	public int getPlayerInventoryByName(String playerName) {
 		return currentPlayers.get(playerName);
 	}
 
 	@Override
-	public int getPlayerInventoryByName(String playerName) {
-		return currentPlayers.get(playerName);
+	public void updatePlayerInventory(String playerName) throws RemoteException {
+		// TODO Auto-generated method stub
+
+		currentPlayers.put(playerName, currentPlayers.get(playerName) - 1);
+
 	}
 
 }

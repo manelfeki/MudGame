@@ -1,11 +1,15 @@
 package mudCombat;
 
-public class Monster {
+import java.io.Serializable;
+
+public class Monster implements Serializable {
 
 	private int inventory;
+	private String piece;
 
-	public Monster() {
+	public Monster(String piece) {
 		this.inventory = 5;
+		this.piece = piece;
 	}
 
 	public int getInventory() {

@@ -6,6 +6,7 @@ package mud;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Map;
 
 import javax.naming.NamingException;
 
@@ -33,7 +34,8 @@ public interface MUDServerInterface extends Remote {
 
 	public Boolean ExistsInMud(String playerName) throws RemoteException;
 
-	public int NumberOfLives(String playerName) throws RemoteException;
-
 	public int getPlayerInventoryByName(String playerName) throws RemoteException;
+
+	public void updatePlayerInventory(String playerName) throws RemoteException;
+
 }
