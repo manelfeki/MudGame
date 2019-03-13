@@ -10,6 +10,8 @@ import java.rmi.server.UnicastRemoteObject;
 
 import mudCombat.MUDCombatServerImpl;
 import mudCombat.MUDCombatServerInterface;
+import mudDiscussion.MUDDiscussionServerImpl;
+import mudDiscussion.MUDDiscussionServerInterface;
 
 public class MUDServerMainline {
 
@@ -42,6 +44,14 @@ public class MUDServerMainline {
 			String uRL = "rmi://" + hostname + ":" + registryport + "/MUDCombatServer";
 			System.out.println("Registering " + uRL);
 			Naming.rebind(uRL, mudCombatstub);
+
+			MUDDiscussionServerImpl mudDiscussionserver = new MUDDiscussionServerImpl();
+			MUDDiscussionServerInterface mudDiscussionstub = (MUDDiscussionServerInterface) UnicastRemoteObject
+					.exportObject(mudDiscussionserver, serverport);
+
+			String discussionuRL = "rmi://" + hostname + ":" + registryport + "/MUDDiscussionServer";
+			System.out.println("Registering " + discussionuRL);
+			Naming.rebind(discussionuRL, mudDiscussionstub);
 
 		} catch (java.net.UnknownHostException e) {
 			System.err.println("Cannot get local host name.");

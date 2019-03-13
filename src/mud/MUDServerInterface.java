@@ -7,10 +7,12 @@ package mud;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Map;
+import java.util.Set;
 
 import javax.naming.NamingException;
 
 import mudCombat.MUDCombatServerInterface;
+import mudDiscussion.MUDDiscussionServerInterface;
 
 public interface MUDServerInterface extends Remote {
 
@@ -31,11 +33,21 @@ public interface MUDServerInterface extends Remote {
 	public void exit(String playerName) throws RemoteException;
 
 	public MUDCombatServerInterface getCombat(String hostname, int port) throws RemoteException, NamingException;
+	
+	public MUDDiscussionServerInterface getDiscussion(String hostname, int port) throws RemoteException, NamingException;
 
 	public Boolean ExistsInMud(String playerName) throws RemoteException;
 
 	public int getPlayerInventoryByName(String playerName) throws RemoteException;
 
 	public void updatePlayerInventory(String playerName) throws RemoteException;
+	
+	
+	
+	public String getPlayerLocationInMUD(String playerName) throws RemoteException;
+	
+	public int getCurrentPlayersNulberInSamePosition() throws RemoteException;
+	public Map<String, Integer> getCurrentPlayers() throws RemoteException;
+	
 
 }

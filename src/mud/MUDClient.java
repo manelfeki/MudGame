@@ -7,6 +7,7 @@ package mud;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.util.concurrent.TimeUnit;
@@ -15,8 +16,9 @@ import javax.naming.NamingException;
 
 import mudCombat.MUDCombatServerInterface;
 import mudCombat.Monster;
+import mudDiscussion.MUDDiscussionServerInterface;
 
-public class MUDClient {
+public class MUDClient extends Thread implements Serializable {
 
 	// prepare the input reader
 	private static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -41,11 +43,19 @@ public class MUDClient {
 
 	private static MUDCombatServerInterface combatServ;
 
+	private static MUDDiscussionServerInterface discussionServer;
+
 	// current location of the player
 	private static String currentLocation = "";
 
 	// the number of life points that the player is currently carrying
 	public static Integer inventory = 10;
+	String NameSender;
+
+	public MUDClient(String playerName2) {
+		// TODO Auto-generated constructor stub
+		this.NameSender = playerName2;
+	}
 
 	public static String getPlayerName() {
 		return playerName;
@@ -113,14 +123,21 @@ public class MUDClient {
 				System.out.println("Let's begin");
 
 				joinMUD();
+
 				// System.out.println(MUDServerImpl.currentInstance.players.size());
+				discussionServer = serv.getDiscussion(hostname, port);
+
+				discussionServer.addClient(new MUDClient(playerName));
+
 			}
 			running = true;
 			currentLocation = serv.getStartLocation();
 			displayOptions();
 
 			runGame();
-		} catch (IOException e) {
+		} catch (
+
+		IOException e) {
 			System.err.println("I/O error.");
 			System.err.println(e.getMessage());
 		} catch (java.rmi.NotBoundException e) {
@@ -149,6 +166,21 @@ public class MUDClient {
 	// handle an input from the player
 	private static void handlePlayerInput(String playerInput) throws NamingException, IOException {
 
+		// Discussion with player in same position
+		if (playerInput.startsWith("\"")) {
+
+			if (serv.getCurrentPlayersNulberInSamePosition() == 1) {
+				System.out.println("You are alone in this piece there is no other player to discuss with");
+			} else if (serv.getCurrentPlayersNulberInSamePosition() > 1) {
+				String message = playerInput.substring(1);
+				// sending the message via MUDDiscussionServer
+				System.out.println(discussionServer.broadcastMessage(playerName, message));
+				System.out.println("Your message is sent to other players in the MUD");
+
+			}
+
+		}
+
 		// move the user in a given direction
 		if (playerInput.contains("move")) {
 
@@ -164,6 +196,7 @@ public class MUDClient {
 				// move the player and display information about the new location
 				System.out.println("You are going " + directionString[1] + "...");
 				currentLocation = serv.moveUser(currentLocation, directionString[1], playerName);
+
 				monster = new Monster(directionString[1]);
 				System.out.println("monster");
 				System.out.println(serv.getCurrentLocationInfo(currentLocation));
@@ -237,7 +270,7 @@ public class MUDClient {
 				System.out.println();
 
 				for (String name : currentPlayers) {
-					System.out.println("* " + name);
+					System.out.println("* " + name + " is already in " + serv.getPlayerLocationInMUD(name));
 				}
 			}
 		}
@@ -246,7 +279,10 @@ public class MUDClient {
 		if (playerInput.equals("help")) {
 			displayOptions();
 		}
-
+		if (playerInput.equals("discuss")) {
+			for (int i=0;i<discussionServer.getDiscussion().size();i++)
+				System.out.println(discussionServer.getDiscussion().get(i));
+		}
 		// exit the game
 		if (playerInput.equals("exit")) {
 
@@ -258,6 +294,11 @@ public class MUDClient {
 
 	}
 
+	public void sendMessageToClient(String message) throws RemoteException {
+		System.out.println("from client");
+		System.out.println("sendfromclient" + message);
+	}
+
 	// displays all possible command options to the player
 	public static void displayOptions() {
 		System.out.println();
@@ -267,8 +308,8 @@ public class MUDClient {
 		System.out.println("* Inventory  - see your number of life points");
 		System.out.println("* Location  - display the information about your surroundings");
 		System.out.println("* Players  - display the list of players currently playing in the same MUD");
-		System.out.println("* Discussion <playerName>  - Discuss with another player");
 		System.out.println("* Help  - display the available commands");
+		System.out.println("* Discuss  - check if there are new messages");
 		System.out.println("* Exit  - exit the game");
 	}
 
@@ -310,6 +351,7 @@ public class MUDClient {
 			if (playerInput.equals("escape")) {
 
 				System.out.println("You choosed to escape from the monster");
+				System.out.println(serv.getCurrentLocationInfo(currentLocation));
 				displayOptions();
 				return false;
 			} else {
@@ -322,4 +364,6 @@ public class MUDClient {
 		}
 		return false;
 	}
+
+
 }

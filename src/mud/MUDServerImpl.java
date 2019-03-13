@@ -13,6 +13,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import mudCombat.MUDCombatServerInterface;
+import mudDiscussion.MUDDiscussionServerInterface;
 
 public class MUDServerImpl implements MUDServerInterface {
 
@@ -106,6 +107,10 @@ public class MUDServerImpl implements MUDServerInterface {
 		return currentPlayers.keySet().toArray(new String[currentInstance.players.keySet().size()]);
 	}
 
+	public Map<String, Integer> getCurrentPlayers() {
+		return currentPlayers;
+	}
+
 	// handles the player exiting the MUD by removing it from the players' list
 	public void exit(String playerName) {
 		currentInstance.players.remove(playerName);
@@ -140,6 +145,29 @@ public class MUDServerImpl implements MUDServerInterface {
 
 		currentPlayers.put(playerName, currentPlayers.get(playerName) - 1);
 
+	}
+
+	@Override
+	public String getPlayerLocationInMUD(String playerName) throws RemoteException {
+		// TODO Auto-generated method stub
+		return currentInstance.players.get(playerName);
+	}
+
+	@Override
+	public int getCurrentPlayersNulberInSamePosition() throws RemoteException {
+
+		// TODO Auto-generated method stub
+
+		return currentInstance.players.size();
+
+	}
+
+	@Override
+	public MUDDiscussionServerInterface getDiscussion(String hostname, int port)
+			throws RemoteException, NamingException {
+		Context namingContext = new InitialContext();
+		String regURL = "rmi://" + hostname + ":" + port + "/MUDDiscussionServer";
+		return (MUDDiscussionServerInterface) namingContext.lookup(regURL);
 	}
 
 }

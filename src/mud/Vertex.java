@@ -36,12 +36,12 @@ class Vertex {
 			summary += "To the " + direction + " there is " + ((Edge) _routes.get(direction))._view + "\n";
 		}
 		iter = _things.iterator();
-		if (iter.hasNext()) {
+		/*if (iter.hasNext()) {
 			summary += "You can see: ";
 			do {
 				summary += iter.next() + " ";
 			} while (iter.hasNext());
-		}
+		}*/
 		summary += "\n\n";
 		return summary;
 	}
