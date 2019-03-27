@@ -52,17 +52,17 @@ public class MUDClient extends Thread implements Serializable {
 	public static Integer inventory = 10;
 	String NameSender;
 
-	public MUDClient(String playerName2) {
+	public MUDClient(String playerName) {
 		// TODO Auto-generated constructor stub
-		this.NameSender = playerName2;
+		this.NameSender = playerName.toLowerCase();
 	}
 
-	public static String getPlayerName() {
-		return playerName;
+	public static String getplayerName() {
+		return playerName.toLowerCase();
 	}
 
-	public static void setPlayerName(String playerName) {
-		MUDClient.playerName = playerName;
+	public static void setplayerName(String playerName) {
+		MUDClient.playerName = playerName.toLowerCase();
 	}
 
 	public static String getCurrentLocation() {
@@ -109,16 +109,16 @@ public class MUDClient extends Thread implements Serializable {
 			System.out.println("What is your name?");
 			try {
 				System.out.print(">> ");
-				playerName = in.readLine();
+				playerName = in.readLine().toLowerCase();
 			} catch (IOException e) {
 				System.err.println("I/O error.");
 				System.err.println(e.getMessage());
 			}
-			if (serv.ExistsInMud(playerName)) {
-				System.out.println("You are already a player and you have " + serv.getPlayerInventoryByName(playerName)
-						+ "points");
+			if (serv.ExistsInMud(playerName.toLowerCase().toLowerCase())) {
+				System.out.println("You are already a player and you have "
+						+ serv.getPlayerInventoryByName(playerName.toLowerCase().toLowerCase()) + "points");
 			} else {
-				System.out.println("Nice to meet you, " + playerName);
+				System.out.println("Nice to meet you, " + playerName.toLowerCase().toLowerCase());
 				System.out.println();
 				System.out.println("Let's begin");
 
@@ -127,7 +127,7 @@ public class MUDClient extends Thread implements Serializable {
 				// System.out.println(MUDServerImpl.currentInstance.players.size());
 				discussionServer = serv.getDiscussion(hostname, port);
 
-				discussionServer.addClient(new MUDClient(playerName));
+				discussionServer.addClient(new MUDClient(playerName.toLowerCase()));
 
 			}
 			running = true;
@@ -174,7 +174,7 @@ public class MUDClient extends Thread implements Serializable {
 			} else if (serv.getCurrentPlayersNulberInSamePosition() > 1) {
 				String message = playerInput.substring(1);
 				// sending the message via MUDDiscussionServer
-				System.out.println(discussionServer.broadcastMessage(playerName, message));
+				System.out.println(discussionServer.broadcastMessage(playerName.toLowerCase(), message));
 				System.out.println("Your message is sent to other players in the MUD");
 
 			}
@@ -189,22 +189,23 @@ public class MUDClient extends Thread implements Serializable {
 
 			// if the server returns the same location as the player is at right now,
 			// it means that there is no path to that direction
-			if (currentLocation.equals(serv.moveUser(currentLocation, directionString[1], playerName))) {
+			if (currentLocation.equals(serv.moveUser(currentLocation, directionString[1], playerName.toLowerCase()))) {
 				System.out
 						.println("Sorry, either there isn't a path to this direction, or this direction is not valid.");
 			} else {
 				// move the player and display information about the new location
 				System.out.println("You are going " + directionString[1] + "...");
-				currentLocation = serv.moveUser(currentLocation, directionString[1], playerName);
+				currentLocation = serv.moveUser(currentLocation, directionString[1], playerName.toLowerCase());
 
 				monster = new Monster(directionString[1]);
 				System.out.println("monster");
 				System.out.println(serv.getCurrentLocationInfo(currentLocation));
 				combatServ = serv.getCombat(hostname, port);
-				combatServ.initialize(monster, serv.getPlayerInventoryByName(playerName));
+				combatServ.initialize(monster, serv.getPlayerInventoryByName(playerName.toLowerCase()));
 				boolean tour = true;
 				// Player choosed to escape
-				while (tour && serv.getPlayerInventoryByName(playerName) > 0 && combatServ.getInventory(monster) > 0) {
+				while (tour && serv.getPlayerInventoryByName(playerName.toLowerCase()) > 0
+						&& combatServ.getInventory(monster) > 0) {
 					char winner;
 					char[] winners = { 'm', 'p' };
 
@@ -218,18 +219,18 @@ public class MUDClient extends Thread implements Serializable {
 					winner = combatServ.getWinner(winners);
 					if (winner == 'm') {
 						System.out.println("This tour is finished, The winner is: The monster");
-						serv.updatePlayerInventory(playerName);
+						serv.updatePlayerInventory(playerName.toLowerCase());
 					}
 
 					else if (winner == 'p') {
 						System.out.println("This tour is finished, The winner is: The player");
 						combatServ.updateMonsterInventory(monster);
 					}
-					System.out.println("Player inventory:" + serv.getPlayerInventoryByName(playerName));
+					System.out.println("Player inventory:" + serv.getPlayerInventoryByName(playerName.toLowerCase()));
 					System.out.println("Monster inventory:" + combatServ.getInventory(monster));
-					tour = chooseCombatOrEscape(playerName);
+					tour = chooseCombatOrEscape(playerName.toLowerCase());
 				}
-				if (serv.getPlayerInventoryByName(playerName) == 0)
+				if (serv.getPlayerInventoryByName(playerName.toLowerCase()) == 0)
 					System.out.println("You are dead");
 				else if (combatServ.getInventory(monster) == 0)
 					System.out.println("The monster is dead, You can go on");
@@ -238,7 +239,7 @@ public class MUDClient extends Thread implements Serializable {
 
 		// display the contents of player's inventory
 		if (playerInput.equals("inventory")) {
-			int playerInventory = serv.getPlayerInventoryByName(playerName);
+			int playerInventory = serv.getPlayerInventoryByName(playerName.toLowerCase());
 
 			// if there isn't any items, inform the player that the inventory is empty
 			if (playerInventory < 1) {
@@ -254,6 +255,36 @@ public class MUDClient extends Thread implements Serializable {
 		if (playerInput.equals("location")) {
 			System.out.println("You look around...");
 			System.out.println(serv.getCurrentLocationInfo(currentLocation));
+		}
+
+		if (playerInput.contains("attack")) {
+			String[] player = playerInput.split(" ");
+			if (player[1].equals(playerName)) {
+				System.out.println("You can't attack yourself!!");
+			} else {
+				System.out.println("You choosed to attack " + player[1] + " So get ready !!");
+				combatServ = serv.getCombat(hostname, port);
+				String winner;
+				String[] winners = new String[2];
+				winners[0] = player[1];
+				winners[1] = playerName.toLowerCase();
+				System.out.println("A combat is taking place");
+				try {
+					TimeUnit.SECONDS.sleep(1);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				winner = combatServ.getWinnerTwoPlayers(winners);
+				System.out.println("The winner is: " + winner);
+				if (winner.equals(playerName.toLowerCase())) {
+					serv.updatePlayerInventory(winners[0]);
+				} else
+					serv.updatePlayerInventory(playerName.toLowerCase());
+				System.out.println(playerName.toLowerCase() + " inventory:"
+						+ serv.getPlayerInventoryByName(playerName.toLowerCase().toLowerCase()));
+				System.out.println(player[1] + " inventory:" + serv.getPlayerInventoryByName(player[1].toLowerCase()));
+			}
 		}
 
 		// display the list of players currently playing in the MUD"
@@ -280,7 +311,7 @@ public class MUDClient extends Thread implements Serializable {
 			displayOptions();
 		}
 		if (playerInput.equals("discuss")) {
-			for (int i=0;i<discussionServer.getDiscussion().size();i++)
+			for (int i = 0; i < discussionServer.getDiscussion().size(); i++)
 				System.out.println(discussionServer.getDiscussion().get(i));
 		}
 		// exit the game
@@ -288,7 +319,7 @@ public class MUDClient extends Thread implements Serializable {
 
 			inventory = 10;
 
-			serv.exit(playerName);
+			serv.exit(playerName.toLowerCase());
 			running = false;
 		}
 
@@ -310,6 +341,7 @@ public class MUDClient extends Thread implements Serializable {
 		System.out.println("* Players  - display the list of players currently playing in the same MUD");
 		System.out.println("* Help  - display the available commands");
 		System.out.println("* Discuss  - check if there are new messages");
+		System.out.println("* Attack <playerName.toLowerCase()>  - attack a player in the same piece");
 		System.out.println("* Exit  - exit the game");
 	}
 
@@ -326,7 +358,7 @@ public class MUDClient extends Thread implements Serializable {
 		} else {
 
 			// move the player to the MUD
-			System.out.println(serv.createUser(playerName, mudName));
+			System.out.println(serv.createUser(playerName.toLowerCase(), mudName));
 		}
 	}
 
@@ -364,6 +396,5 @@ public class MUDClient extends Thread implements Serializable {
 		}
 		return false;
 	}
-
 
 }

@@ -58,10 +58,10 @@ public class MUDServerImpl implements MUDServerInterface {
 		} else {
 			System.out.println("The player " + playerName + " has joined the " + mudName + " MUD.");
 			currentInstance.addThing(currentInstance.startLocation(), playerName);
-			currentInstance.players.put(playerName, currentInstance.startLocation());
+			currentInstance.players.put(playerName.toLowerCase(), currentInstance.startLocation());
 
 			// add the player to the current players list with the MUD
-			currentPlayers.put(playerName, MUDClient.inventory);
+			currentPlayers.put(playerName.toLowerCase(), MUDClient.inventory);
 			System.out.println(currentInstance.players.size());
 		}
 
@@ -81,9 +81,9 @@ public class MUDServerImpl implements MUDServerInterface {
 	// move the user to a give direction
 	// returns a string telling that the player has moved a given direction
 	public String moveUser(String currentLocation, String direction, String playerName) {
-		currentInstance.players.remove(playerName);
-		currentInstance.players.put(playerName, direction);
-		return currentInstance.moveThing(currentLocation, direction, playerName);
+		currentInstance.players.remove(playerName.toLowerCase());
+		currentInstance.players.put(playerName.toLowerCase(), direction);
+		return currentInstance.moveThing(currentLocation, direction, playerName.toLowerCase());
 	}
 
 	// returns the start location of the MUD
@@ -113,8 +113,8 @@ public class MUDServerImpl implements MUDServerInterface {
 
 	// handles the player exiting the MUD by removing it from the players' list
 	public void exit(String playerName) {
-		currentInstance.players.remove(playerName);
-		currentPlayers.remove(playerName);
+		currentInstance.players.remove(playerName.toLowerCase());
+		currentPlayers.remove(playerName.toLowerCase());
 		System.out.println("The player " + playerName + " has left the server.");
 	}
 
@@ -127,7 +127,7 @@ public class MUDServerImpl implements MUDServerInterface {
 
 	@Override
 	public Boolean ExistsInMud(String playerName) {
-		if (currentPlayers.containsKey(playerName)) {
+		if (currentPlayers.containsKey(playerName.toLowerCase())) {
 			System.out.println(playerName + " is here");
 			return true;
 		} else
@@ -136,7 +136,7 @@ public class MUDServerImpl implements MUDServerInterface {
 
 	@Override
 	public int getPlayerInventoryByName(String playerName) {
-		return currentPlayers.get(playerName);
+		return currentPlayers.get(playerName.toLowerCase());
 	}
 
 	@Override

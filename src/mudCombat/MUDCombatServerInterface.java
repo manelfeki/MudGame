@@ -17,4 +17,6 @@ public interface MUDCombatServerInterface extends Remote {
 	public char getWinner(char[] winners) throws RemoteException;
 
 	public int getInventory(Monster monster) throws RemoteException;
+
+	public String getWinnerTwoPlayers(String[] winners) throws RemoteException;
 }

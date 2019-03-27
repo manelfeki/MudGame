@@ -31,4 +31,10 @@ public class MUDCombatServerImpl implements MUDCombatServerInterface {
 		return this.monster.getInventory();
 	}
 
+	@Override
+	public String getWinnerTwoPlayers(String[] winners) throws RemoteException {
+		// TODO Auto-generated method stub
+		return winners[(new Random()).nextInt(2)];
+	}
+
 }

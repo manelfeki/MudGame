@@ -14,3 +14,6 @@ public interface MUDDiscussionServerInterface extends Remote {
 	void addClient(MUDClient chatInterface) throws RemoteException;
 
 }
+
+
+
