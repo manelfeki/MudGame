@@ -5,7 +5,9 @@
 package mud;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.naming.Context;
@@ -168,6 +170,30 @@ public class MUDServerImpl implements MUDServerInterface {
 		Context namingContext = new InitialContext();
 		String regURL = "rmi://" + hostname + ":" + port + "/MUDDiscussionServer";
 		return (MUDDiscussionServerInterface) namingContext.lookup(regURL);
+	}
+
+	@Override
+	public List<String> getCurrentPlayersInSamePosition(String position) throws RemoteException {
+		System.out.println("Avant players : " + position + currentInstance.players);
+		List<String> listOfKeys = null;
+
+		// Check if Map contains the given value
+		if (currentInstance.players.containsValue(position)) {
+			// Create an Empty List
+			listOfKeys = new ArrayList<>();
+
+			// Iterate over each entry of map using entrySet
+			for (Map.Entry<String, String> entry : currentInstance.players.entrySet()) {
+				// Check if value matches with given value
+				if (entry.getValue().equals(position)) {
+					// Store the key from entry to the list
+					listOfKeys.add(entry.getKey());
+				}
+			}
+		}
+		System.out.println("players :" + listOfKeys);
+
+		return listOfKeys;
 	}
 
 }

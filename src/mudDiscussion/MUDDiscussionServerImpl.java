@@ -28,6 +28,7 @@ public class MUDDiscussionServerImpl implements MUDDiscussionServerInterface {
 	}
 
 	public synchronized String broadcastMessage(String clientname, String message) throws RemoteException {
+		System.out.println(clientList);
 		for (int i = 0; i < clientList.size(); i++) {
 			System.out.println("size" + clientList.size());
 			clientList.get(i).sendMessageToClient(clientname.toUpperCase() + " : " + message);

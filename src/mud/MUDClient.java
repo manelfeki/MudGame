@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.naming.NamingException;
@@ -127,11 +128,12 @@ public class MUDClient extends Thread implements Serializable {
 				// System.out.println(MUDServerImpl.currentInstance.players.size());
 				discussionServer = serv.getDiscussion(hostname, port);
 
-				discussionServer.addClient(new MUDClient(playerName.toLowerCase()));
+				// discussionServer.addClient(new MUDClient(playerName.toLowerCase()));
 
 			}
 			running = true;
 			currentLocation = serv.getStartLocation();
+			System.out.println("hello Current Location:" + currentLocation);
 			displayOptions();
 
 			runGame();
@@ -166,16 +168,28 @@ public class MUDClient extends Thread implements Serializable {
 	// handle an input from the player
 	private static void handlePlayerInput(String playerInput) throws NamingException, IOException {
 
+		List<String> PlayersInSamePiece = null;
+		PlayersInSamePiece = serv.getCurrentPlayersInSamePosition(serv.getPlayerLocationInMUD(playerName));
 		// Discussion with player in same position
 		if (playerInput.startsWith("\"")) {
+			int i;
+			String s = "";
 
-			if (serv.getCurrentPlayersNulberInSamePosition() == 1) {
+			System.out.println(PlayersInSamePiece);
+			if (PlayersInSamePiece.size() == 1) {
 				System.out.println("You are alone in this piece there is no other player to discuss with");
-			} else if (serv.getCurrentPlayersNulberInSamePosition() > 1) {
+			} else if (PlayersInSamePiece.size() > 1) {
+				for (String player : PlayersInSamePiece)
+
+				{
+					s = s + player + " & ";
+					System.out.println(player);
+					discussionServer.addClient(new MUDClient(player));
+				}
 				String message = playerInput.substring(1);
 				// sending the message via MUDDiscussionServer
-				System.out.println(discussionServer.broadcastMessage(playerName.toLowerCase(), message));
-				System.out.println("Your message is sent to other players in the MUD");
+				System.out.println(discussionServer.broadcastMessage(playerName, message));
+				System.out.println("Your message is sent to other players in the same piece:" + s);
 
 			}
 
@@ -261,7 +275,10 @@ public class MUDClient extends Thread implements Serializable {
 			String[] player = playerInput.split(" ");
 			if (player[1].equals(playerName)) {
 				System.out.println("You can't attack yourself!!");
-			} else {
+			} else if (!PlayersInSamePiece.contains(player[1]))
+				System.out.println("You are not in the same piece with this player!!");
+
+			else {
 				System.out.println("You choosed to attack " + player[1] + " So get ready !!");
 				combatServ = serv.getCombat(hostname, port);
 				String winner;
@@ -310,9 +327,15 @@ public class MUDClient extends Thread implements Serializable {
 		if (playerInput.equals("help")) {
 			displayOptions();
 		}
+		// show the discussion with the players in same piece
 		if (playerInput.equals("discuss")) {
-			for (int i = 0; i < discussionServer.getDiscussion().size(); i++)
-				System.out.println(discussionServer.getDiscussion().get(i));
+			// System.out.println("discuss" + PlayersInSamePiece);
+			if (PlayersInSamePiece.size() == 1) {
+				System.out.println("Sorry but you have no message because you are alone in this piece");
+			} else if (PlayersInSamePiece.size() > 1)
+				for (int i = 0; i < discussionServer.getDiscussion().size(); i++)
+					System.out.println(discussionServer.getDiscussion().get(i));
+
 		}
 		// exit the game
 		if (playerInput.equals("exit")) {
